@@ -26,8 +26,16 @@ finsight-project/
 ### 🛠️ Quick Start
 
 #### 1. Activate Virtual Environment
-```bash
+# Check if venv exists
+dir venv
+# If it doesn't exist, create it
+python -m venv venv
+# Activate it
 .\venv\Scripts\Activate.ps1
+# If you get execution policy error, run:
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+# Then try activating again
+
 
 #### 2. Run the API
 python run_api.py
