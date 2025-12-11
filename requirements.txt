@@ -1,0 +1,36 @@
+# Create requirements.txt
+@"
+# Core
+fastapi==0.104.1
+uvicorn==0.24.0
+pandas==2.1.4
+numpy==1.24.3
+
+# LLM & NLP
+transformers==4.35.2
+torch==2.1.1
+sentencepiece==0.1.99
+accelerate==0.25.0
+datasets==2.15.0
+
+# Financial NLP
+finbert-embedding==0.1.3
+yfinance==0.2.33
+
+# Utilities
+python-dotenv==1.0.0
+pydantic==2.5.0
+httpx==0.25.1
+loguru==0.7.2
+
+# Development
+pytest==7.4.3
+black==23.11.0
+jupyter==1.0.0
+"@ | Out-File requirements.txt -Encoding utf8
+
+# Evaluation Metrics
+rouge-score==0.1.2
+nltk==3.8.1
+scikit-learn==1.3.2
+scipy==1.11.4
