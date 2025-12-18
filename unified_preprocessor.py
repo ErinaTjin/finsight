@@ -10,6 +10,9 @@ import yfinance as yf
 from hashlib import md5
 import warnings
 warnings.filterwarnings('ignore')
+import re
+import json
+import pytz
 
 try:
     from transformers import pipeline
@@ -60,22 +63,27 @@ class FinancialDataPreprocessor:
                 print(f"⚠️ Could not load NER model: {e}")
                 self.config['ner_entity_mapping'] = False
     
+    
+    
     def clean_text(self, text: str) -> str:
         """Clean and normalize text"""
-        if not isinstance(text, str):
+        # Handle None or NaN
+        if pd.isna(text):
             return ""
         
-        # Remove extra whitespace
-        text = re.sub(r'\s+', ' ', text.strip())
+        # Convert to string if not already
+        if not isinstance(text, str):
+            text = str(text)
         
-        # Remove control characters
-        text = re.sub(r'[\x00-\x1f\x7f-\x9f]', '', text)
+        # Quick and simple cleaning
+        text = text.strip()
+        if not text:
+            return ""
         
-        # Normalize quotes and dashes
-        text = text.replace('"', '"').replace("'", "'")
-        text = text.replace('–', '-').replace('—', '-')
-        
+        # Remove multiple spaces
+        text = re.sub(r'\s+', ' ', text)
         return text
+
     
     def extract_entities(self, text: str) -> List[Dict]:
         """Extract entities from text using NER"""
@@ -137,6 +145,24 @@ class FinancialDataPreprocessor:
         """
         Fetch price data for a ticker around a given date
         """
+        # Clean the ticker first
+        ticker = self.clean_ticker_symbol(ticker)
+        
+        # Skip invalid tickers
+        if not self.is_valid_ticker(ticker):
+            # print(f"⚠️ Skipping invalid ticker: {ticker}")
+            return None
+        
+        # Check if date is too old (yfinance only has last 730 days of 1h data)
+        if date < (datetime.now(pytz.UTC) - timedelta(days=730)):
+            # print(f"⚠️ Skipping {ticker}: date {date.date()} is older than 730 days")
+            return None
+        
+        # Check if date is in the future
+        if date > datetime.now(pytz.UTC):
+            # print(f"⚠️ Skipping {ticker}: date {date.date()} is in the future")
+            return None
+        
         try:
             # Convert to date only for yfinance
             start_date = (date - timedelta(hours=window_hours)).strftime('%Y-%m-%d')
@@ -170,8 +196,43 @@ class FinancialDataPreprocessor:
             }
             
         except Exception as e:
-            print(f"⚠️ Error fetching price for {ticker}: {e}")
+            # Don't print every error to avoid spam
+            if "not available" not in str(e):
+                print(f"⚠️ Error fetching {ticker}: {str(e)[:100]}")
             return None
+
+    def clean_ticker_symbol(self, ticker: str) -> str:
+        """Clean ticker symbol by removing invalid characters"""
+        if pd.isna(ticker):
+            return ""
+        
+        ticker = str(ticker).strip()
+        
+        # Remove dollar signs, quotes, and other invalid characters
+        ticker = re.sub(r'[$\'"\.,]', '', ticker)
+        
+        # Convert to uppercase
+        ticker = ticker.upper()
+        
+        # Remove any non-alphanumeric characters (except maybe dash)
+        ticker = re.sub(r'[^A-Z0-9\-]', '', ticker)
+        
+        return ticker
+
+    def is_valid_ticker(self, ticker: str) -> bool:
+        """Check if ticker is valid for yfinance"""
+        if not ticker or ticker == 'UNKNOWN':
+            return False
+        
+        # Valid tickers are usually 1-5 characters
+        if len(ticker) > 6 or len(ticker) < 1:
+            return False
+        
+        # Should be alphanumeric
+        if not re.match(r'^[A-Z0-9\.\-]+$', ticker):
+            return False
+        
+        return True
     
     def preprocess_fnspid(self, df_finspid: pd.DataFrame) -> pd.DataFrame:
         """
@@ -230,11 +291,19 @@ class FinancialDataPreprocessor:
         if 'summary' not in df_finspid_clean.columns:
             df_finspid_clean['summary'] = df_finspid_clean['content'].str[:500]
         
-        # Clean text data
+        # Clean text data - use vectorized operations
         text_columns = ['headline', 'content', 'summary']
         for col in text_columns:
             if col in df_finspid_clean.columns:
-                df_finspid_clean[col] = df_finspid_clean[col].astype(str).apply(self.clean_text)
+                print(f"  Cleaning {col}...")
+        
+                # Fill NaN and convert to string
+                df_finspid_clean[col] = df_finspid_clean[col].fillna('').astype(str)
+                
+                # Apply cleaning (vectorized)
+                df_finspid_clean[col] = df_finspid_clean[col].str.strip()
+                df_finspid_clean[col] = df_finspid_clean[col].str.replace(r'\s+', ' ', regex=True)
+                
         
         # Filter by text length
         mask = df_finspid_clean['content'].str.len() >= self.config['min_news_length']
@@ -445,9 +514,21 @@ class FinancialDataPreprocessor:
         
         print(f"   Processing {len(rows_to_process)} rows for price alignment")
         
+        # Add cache for failed tickers to avoid repeated attempts
+        failed_tickers_cache = set()
+        
         processed_count = 0
+        successful_count = 0
+        
+        # Process with progress bar
         for idx, row in rows_to_process.iterrows():
             if pd.isna(row['ticker']) or row['ticker'] == 'UNKNOWN':
+                continue
+            
+            # Clean ticker
+            ticker = self.clean_ticker_symbol(row['ticker'])
+            
+            if not ticker or ticker in failed_tickers_cache:
                 continue
             
             if pd.isna(row['timestamp']):
@@ -455,7 +536,7 @@ class FinancialDataPreprocessor:
             
             # Get price data
             price_data = self.get_price_data(
-                row['ticker'],
+                ticker,
                 row['timestamp'],
                 self.config['price_window_hours']
             )
@@ -465,15 +546,20 @@ class FinancialDataPreprocessor:
                 df.at[idx, 'pre_price'] = price_data['pre_price']
                 df.at[idx, 'post_price'] = price_data['post_price']
                 df.at[idx, 'has_price_data'] = True
-                processed_count += 1
+                successful_count += 1
+            
+            processed_count += 1
             
             # Progress update
-            if processed_count % 100 == 0:
-                print(f"   Processed {processed_count} rows...")
+            if processed_count % 50 == 0:
+                print(f"   Progress: {processed_count}/{len(rows_to_process)} rows, {successful_count} successful")
+            
+            # Add small delay to avoid overwhelming yfinance API
+            import time
+            time.sleep(0.1)
         
-        print(f"   Successfully aligned {processed_count} rows with price data")
-        
-        return df
+        print(f"   Successfully aligned {successful_count}/{len(rows_to_process)} rows with price data")
+        return df  # This line should be properly indented
     
     def create_sentiment_labels(self, df: pd.DataFrame) -> pd.DataFrame:
         """
