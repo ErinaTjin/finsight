@@ -1,0 +1,13 @@
+{
+  "deduplicate": true,
+  "align_prices": true,
+  "create_sentiment_labels": true,
+  "ner_entity_mapping": false,
+  "price_window_hours": 24,
+  "sentiment_thresholds": [
+    -0.01,
+    0.01
+  ],
+  "min_news_length": 20,
+  "max_news_length": 10000
+}

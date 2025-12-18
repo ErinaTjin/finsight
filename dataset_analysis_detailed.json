@@ -1,0 +1,68 @@
+{
+  "fnspid": {
+    "total_rows": 70,
+    "columns": [
+      "Unnamed: 0",
+      "Date",
+      "Article_title",
+      "Stock_symbol",
+      "Url",
+      "Publisher",
+      "Author",
+      "Article",
+      "Lsa_summary",
+      "Luhn_summary",
+      "Textrank_summary",
+      "Lexrank_summary"
+    ],
+    "tickers": 0,
+    "unique_tickers": [],
+    "date_range": null,
+    "missing_values": {
+      "Unnamed: 0": 0,
+      "Date": 0,
+      "Article_title": 0,
+      "Stock_symbol": 0,
+      "Url": 0,
+      "Publisher": 70,
+      "Author": 70,
+      "Article": 0,
+      "Lsa_summary": 0,
+      "Luhn_summary": 0,
+      "Textrank_summary": 0,
+      "Lexrank_summary": 0
+    },
+    "text_stats": {
+      "avg_headline_length": 0,
+      "avg_content_length": 0
+    }
+  },
+  "nifty": {
+    "total_rows": 0,
+    "columns": [
+      "id",
+      "date",
+      "context",
+      "news",
+      "conversations",
+      "label",
+      "pct_change"
+    ],
+    "tickers": 0,
+    "unique_tickers": [],
+    "date_range": null,
+    "missing_values": {
+      "id": 0,
+      "date": 0,
+      "context": 0,
+      "news": 0,
+      "conversations": 0,
+      "label": 0,
+      "pct_change": 0
+    },
+    "text_stats": {
+      "avg_headline_length": 0,
+      "avg_content_length": 0
+    }
+  }
+}

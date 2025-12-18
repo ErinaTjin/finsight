@@ -1,0 +1,42 @@
+{
+  "fnspid_columns": [
+    "Unnamed: 0",
+    "Date",
+    "Article_title",
+    "Stock_symbol",
+    "Url",
+    "Publisher",
+    "Author",
+    "Article",
+    "Lsa_summary",
+    "Luhn_summary",
+    "Textrank_summary",
+    "Lexrank_summary"
+  ],
+  "nifty_columns": [
+    "id",
+    "date",
+    "context",
+    "news",
+    "conversations",
+    "label",
+    "pct_change"
+  ],
+  "fnspid_shape": [
+    15549299,
+    12
+  ],
+  "nifty_shape": [
+    1477,
+    7
+  ],
+  "unification_plan": {
+    "target_column": "fnspid_source",
+    "ticker": "nifty_source",
+    "headline": "map_logic",
+    "timestamp": "need_to_create",
+    "price_change": "fnspid: price_change, nifty: pct_change",
+    "sentiment_label": "need_to_create_from_price_change",
+    "source": "'FNSPID' or 'NIFTY'"
+  }
+}

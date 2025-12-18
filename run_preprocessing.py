@@ -1,4 +1,6 @@
 # run_preprocessing.py
+import pandas as pd
+
 print("="*60)
 print("ENHANCED FINANCIAL DATA PREPROCESSING PIPELINE")
 print("="*60)
@@ -11,6 +13,60 @@ try:
     
     print(f"✅ Loaded FNSPID: {df_finspid.shape if df_finspid is not None else 'None'}")
     print(f"✅ Loaded NIFTY: {df_nifty.shape if df_nifty is not None else 'None'}")
+
+    print("\n📅 Filtering datasets for 2024 and 2025 only...")
+    
+    def filter_by_year(df, date_column):
+        """Filter dataframe to only include 2024 and 2025 data"""
+        if df is None or date_column not in df.columns:
+            return df
+        
+        # Convert to datetime if not already
+        df[date_column] = pd.to_datetime(df[date_column], errors='coerce', utc=True)
+        
+        # Filter for 2024 and 2025
+        df_filtered = df[df[date_column] >= '2024-01-01'].copy()
+        
+        initial_count = len(df)
+        filtered_count = len(df_filtered)
+        removed_count = initial_count - filtered_count
+        
+        print(f"   - Filtered: {filtered_count} rows remaining ({removed_count} rows removed)")
+        print(f"   - Date range: {df_filtered[date_column].min()} to {df_filtered[date_column].max()}")
+        
+        return df_filtered
+    
+    # Apply filtering to both datasets
+    if df_finspid is not None:
+        # Determine the date column name in FNSPID
+        fnspid_date_col = None
+        possible_date_cols = ['date', 'Date', 'timestamp', 'Timestamp', 'time', 'Time']
+        
+        for col in possible_date_cols:
+            if col in df_finspid.columns:
+                fnspid_date_col = col
+                break
+        
+        if fnspid_date_col:
+            df_finspid = filter_by_year(df_finspid, fnspid_date_col)
+        else:
+            print("⚠️ Could not find date column in FNSPID dataset")
+    
+    if df_nifty is not None:
+        # Determine the date column name in NIFTY
+        nifty_date_col = None
+        possible_date_cols = ['date', 'Date', 'timestamp', 'Timestamp', 'time', 'Time']
+        
+        for col in possible_date_cols:
+            if col in df_nifty.columns:
+                nifty_date_col = col
+                break
+        
+        if nifty_date_col:
+            df_nifty = filter_by_year(df_nifty, nifty_date_col)
+        else:
+            print("⚠️ Could not find date column in NIFTY dataset")
+    # ============================================
     
     # Show column names
     if df_finspid is not None:

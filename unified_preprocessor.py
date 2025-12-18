@@ -63,7 +63,42 @@ class FinancialDataPreprocessor:
                 print(f"⚠️ Could not load NER model: {e}")
                 self.config['ner_entity_mapping'] = False
     
-    
+    def filter_by_year_range(self, df: pd.DataFrame, date_column: str = 'timestamp') -> pd.DataFrame:
+        """
+        Filter dataframe to only include data from 2024 onwards
+        
+        Args:
+            df: DataFrame to filter
+            date_column: Name of the date column
+        
+        Returns:
+            Filtered DataFrame
+        """
+        if df is None or df.empty:
+            return df
+        
+        if date_column not in df.columns:
+            print(f"⚠️ Date column '{date_column}' not found for year filtering")
+            return df
+        
+        # Ensure timestamp column is datetime
+        if not pd.api.types.is_datetime64_any_dtype(df[date_column]):
+            df[date_column] = pd.to_datetime(df[date_column], errors='coerce', utc=True)
+        
+        # Store initial count
+        initial_count = len(df)
+        
+        # Filter for 2024 and 2025 only
+        mask = df[date_column] >= pd.Timestamp('2024-01-01', tz='UTC')
+        df_filtered = df[mask].copy()
+        
+        filtered_count = len(df_filtered)
+        removed_count = initial_count - filtered_count
+        
+        print(f"   • Year filtering: {filtered_count} rows kept ({removed_count} rows removed)")
+        print(f"   • New date range: {df_filtered[date_column].min()} to {df_filtered[date_column].max()}")
+        
+        return df_filtered
     
     def clean_text(self, text: str) -> str:
         """Clean and normalize text"""
@@ -245,6 +280,10 @@ class FinancialDataPreprocessor:
         # Create a copy to avoid modifying original
         df_finspid_clean = df_finspid.copy()
         
+        # NEW: Filter for 2024 and 2025 only
+        print("📅 Filtering for 2024-2025 data...")
+        df_finspid_clean = self.filter_by_year_range(df_finspid_clean, 'date')
+
         # Clean column names
         df_finspid_clean.columns = [col.lower().strip().replace(' ', '_') for col in df_finspid_clean.columns]
         
@@ -375,6 +414,10 @@ class FinancialDataPreprocessor:
         print("="*50)
         
         df_nifty_clean = df_nifty.copy()
+        
+         # NEW: Filter for 2024 and 2025 only
+        print("📅 Filtering for 2024-2025 data...")
+        df_nifty_clean = self.filter_by_year_range(df_nifty_clean, 'date')
         
         # Clean column names
         df_nifty_clean.columns = [col.lower().strip() for col in df_nifty_clean.columns]
