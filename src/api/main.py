@@ -141,3 +141,89 @@ async def get_signal(ticker: str, start_date: Optional[str] = None, end_date: Op
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
+
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Optional
+import torch
+from transformers import pipeline
+import yaml
+
+app = FastAPI(title="Financial News Analysis API")
+
+# Load models (lazy loading)
+sentiment_pipeline = None
+summarization_pipeline = None
+
+class SentimentRequest(BaseModel):
+    text: str
+    model_name: Optional[str] = "finbert"
+
+class SummarizationRequest(BaseModel):
+    text: str
+    max_length: Optional[int] = 128
+    min_length: Optional[int] = 30
+
+@app.on_event("startup")
+async def startup_event():
+    """Load models on startup"""
+    global sentiment_pipeline, summarization_pipeline
+    
+    # Load sentiment model
+    try:
+        sentiment_pipeline = pipeline(
+            "text-classification",
+            model="./models/sentiment",
+            tokenizer="./models/sentiment"
+        )
+    except:
+        print("Warning: Sentiment model not found")
+    
+    # Load summarization model
+    try:
+        summarization_pipeline = pipeline(
+            "summarization",
+            model="./models/summarization",
+            tokenizer="./models/summarization"
+        )
+    except:
+        print("Warning: Summarization model not found")
+
+@app.get("/")
+async def root():
+    return {"message": "Financial News Analysis API"}
+
+@app.post("/sentiment")
+async def analyze_sentiment(request: SentimentRequest):
+    if sentiment_pipeline is None:
+        raise HTTPException(status_code=503, detail="Sentiment model not loaded")
+    
+    try:
+        result = sentiment_pipeline(request.text)[0]
+        return {
+            "text": request.text,
+            "sentiment": result['label'],
+            "confidence": result['score']
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/summarize")
+async def summarize_text(request: SummarizationRequest):
+    if summarization_pipeline is None:
+        raise HTTPException(status_code=503, detail="Summarization model not loaded")
+    
+    try:
+        result = summarization_pipeline(
+            request.text,
+            max_length=request.max_length,
+            min_length=request.min_length,
+            do_sample=False
+        )[0]['summary_text']
+        
+        return {
+            "original_text": request.text[:200] + "...",
+            "summary": result
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

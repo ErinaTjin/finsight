@@ -1,0 +1,18 @@
+torch>=2.0.0
+transformers>=4.30.0
+datasets
+sentencepiece
+protobuf
+fastapi>=0.100.0
+uvicorn
+pydantic
+scikit-learn
+pandas
+numpy
+rouge-score
+nltk
+pyyaml
+python-dotenv
+accelerate
+peft
+bitsandbytes  # For 4-bit quantization if needed

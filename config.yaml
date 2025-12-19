@@ -1,0 +1,25 @@
+data:
+  text_column: "content"
+  summary_column: "headline"
+  sentiment_column: "sentiment_label"
+  
+models:
+  sentiment:
+    base_model: "yiyanghkust/finbert-tone"
+    num_labels: 3
+    max_length: 512
+    
+  summarization:
+    base_model: "google/flan-t5-base"
+    max_input_length: 512
+    max_target_length: 128
+    
+training:
+  batch_size: 16
+  epochs: 3
+  learning_rate: 2e-5
+  
+api:
+  host: "0.0.0.0"
+  port: 8000
+  reload: true
