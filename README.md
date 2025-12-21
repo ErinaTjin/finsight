@@ -1,63 +1,40 @@
-# FinSight: LLM-Based Real-Time Market Intelligence Co-Pilot
+### Member B (Shi Ying): Analytics Interpretation & Evaluation
 
-## 🚀 Week 1: Development Environment Setup Complete!
+In addition to completing the end-to-end analytics pipeline (dependencies are listed in `requirements.txt`), this role focused on
+interpreting results, validating assumptions, and documenting analytical insights
+derived from the final evaluation plots.
 
-### What's Set Up:
-✅ **FastAPI Backend** with REST endpoints  
-✅ **LLM Libraries** (Transformers, FinBERT, BART)  
-✅ **Virtual Environment** with all dependencies  
-✅ **Git Repository** with proper structure  
-✅ **Data Preprocessing Pipeline** (FNSPID + NIFTY)  
-✅ **Test Suite** for API and models  
+#### Sentiment Time-Series Analysis
+- Aggregated 68 sentiment records for AMD across the period 2024-01-01 to 2024-01-09.
+- The sentiment index remained consistently positive, with a mean value of 0.493
+  and relatively low volatility (std ≈ 0.050).
+- Time-series visualization shows short-term fluctuations but no sharp regime shifts,
+  suggesting stable market sentiment over the observed window.
+- A 7-day rolling average was used to smooth short-term noise and highlight underlying
+  sentiment trends.
 
-### 📁 Project Structure
-finsight-project/
-├── src/
-│ ├── api/ # FastAPI backend (main.py)
-│ ├── models/ # LLM models (load_models.py)
-│ ├── utils/ # Utilities (config.py, preprocessor)
-│ └── data/ # Data loading
-├── processed_data/ # Preprocessed datasets
-├── tests/ # Unit tests
-├── notebooks/ # Jupyter notebooks
-└── scripts/ # Run scripts
+#### Sentiment–Price Correlation Results
+- Pearson correlation analysis between sentiment index and price movements yielded
+  a weak positive correlation for AMD (ρ ≈ 0.069).
+- Statistical significance testing showed no significant correlations (p < 0.05),
+  indicating that short-term sentiment alone is insufficient to explain price changes
+  in this sample.
+- The correlation distribution plot confirms limited dispersion, reflecting the
+  constrained sample size (single ticker, short time horizon).
 
+#### Key Analytical Takeaways
+- While sentiment remained generally positive, its explanatory power over short-term
+  price movements was limited in this dataset.
+- Results highlight the importance of combining sentiment indicators with additional
+  market variables (e.g. volume, volatility, macro signals) for stronger predictive
+  modeling.
+- Findings reinforce the need for longer time horizons and multi-ticker analysis
+  when evaluating sentiment-driven financial signals.
 
-### 🛠️ Quick Start
+#### Deliverables
+- Final evaluation plots: sentiment time-series and correlation distribution.
+- Summary statistics and correlation report.
+- Interactive visualization dashboard for exploratory analysis.
 
-#### 1. Activate Virtual Environment
-# Check if venv exists
-dir venv
-# If it doesn't exist, create it
-python -m venv venv
-# Activate it
-.\venv\Scripts\Activate.ps1
-# If you get execution policy error, run:
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-# Then try activating again
-
-
-#### 2. Run the API
-python run_api.py
-
-#### 3. Test Models
-python test_models.py
-
-#### 4. Access APIs
-API Docs: http://localhost:8000/docs
-
-Health Check: http://localhost:8000/health
-
-# API Endpoints
-GET / - Welcome message
-GET /health - Health check
-POST /summarize - News summarization (Week 2)
-POST /sentiment - Sentiment analysis (Week 2)
-GET /data/stats - View processed data stats
-
-# Test suite
-# Run all tests
-pytest tests/
-# Run specific tests
-pytest tests/test_api.py
-pytest tests/test_models.py
+All analytics deliverables, documentation, and result interpretations were completed
+and integrated into the final project evaluation.
