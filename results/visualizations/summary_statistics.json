@@ -1,0 +1,35 @@
+{
+  "generated_at": "2025-12-21 19:44:23",
+  "sentiment_data": {
+    "total_records": 68,
+    "unique_tickers": 1,
+    "date_range": {
+      "start": "2024-01-01 00:00:00",
+      "end": "2024-01-09 00:00:00"
+    },
+    "sentiment_statistics": {
+      "mean": 0.49308823529411766,
+      "std": 0.04959452421192635,
+      "min": 0.39,
+      "max": 0.58
+    }
+  },
+  "correlation_analysis": {
+    "total_tickers": 1,
+    "average_correlation": 0.0689612184287659,
+    "median_correlation": 0.0689612184287659,
+    "significant_correlations": 0,
+    "top_positive": [
+      {
+        "ticker": "AMD",
+        "pearson_correlation": 0.0689612184287659
+      }
+    ],
+    "top_negative": [
+      {
+        "ticker": "AMD",
+        "pearson_correlation": 0.0689612184287659
+      }
+    ]
+  }
+}

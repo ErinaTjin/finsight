@@ -1,0 +1,9 @@
+{
+  "pearson_correlation": 0.06896121842876596,
+  "pearson_p_value": 0.5881894048053427,
+  "spearman_correlation": 0.21101192611100714,
+  "spearman_p_value": 0.09418401679819209,
+  "n_observations": 64,
+  "average_sentiment": 0.49265625,
+  "average_return": -0.5672657191268367
+}
