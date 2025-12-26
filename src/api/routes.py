@@ -6,25 +6,29 @@ from .schemas import (
     SignalResponse,
 )
 
+from summarization_model import summarize_text
+from sentiment_classifier import predict_sentiment
+
 router = APIRouter()
+
 
 
 @router.post("/summarise", response_model=SummariseResponse)
 def summarise_news(request: TextRequest):
-    # TEMP dummy response (real model testing later)
+    summary, confidence = summarize_text(request.text)
     return {
-        "summary": "This is a placeholder summary.",
-        "confidence": 0.99
+        "summary": summary,
+        "confidence": confidence
     }
 
 
 @router.post("/sentiment", response_model=SentimentResponse)
 def analyse_sentiment(request: TextRequest):
-    # TEMP dummy response (real model wired in Step 4)
+    score, label, prob = predict_sentiment(request.text)
     return {
-        "sentiment_score": 0.5,
-        "sentiment_label": "positive",
-        "probability": 0.9
+        "sentiment_score": score,
+        "sentiment_label": label,
+        "probability": prob
     }
 
 
