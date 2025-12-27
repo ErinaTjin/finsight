@@ -142,6 +142,8 @@ if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
 
+'''
+# Commented out bc there are two backends rn
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 from typing import Optional
@@ -227,3 +229,5 @@ async def summarize_text(request: SummarizationRequest):
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+'''
